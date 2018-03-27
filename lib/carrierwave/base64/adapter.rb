@@ -38,6 +38,45 @@ module Carrierwave
         # rubocop:enable Metrics/CyclomaticComplexity
         # rubocop:enable Metrics/PerceivedComplexity
       end
+
+      def mount_base64_uploaders(attribute, uploader_class, options = {})
+        mount_uploaders attribute, uploader_class, options
+
+        options[:file_name] ||= proc { attribute }
+
+        if options[:file_name].is_a?(String)
+          warn(
+            '[Deprecation warning] Setting `file_name` option to a string is '\
+            'deprecated and will be removed in 3.0.0. If you want to keep the '\
+            'existing behaviour, wrap the string in a Proc'
+          )
+        end
+
+        define_method "#{attribute}=" do |data_array|
+          return if data_array == send(attribute) # TODO: Check
+
+          if respond_to?("#{attribute}_will_change!") && data_array.present?
+            send "#{attribute}_will_change!"
+          end
+
+          filename = if options[:file_name].respond_to?(:call)
+            options[:file_name].call(self)
+          else
+            options[:file_name]
+          end.to_s
+
+          files = []
+          data_array.each_with_index do |data, i|
+            files << if data.is_a?(String) && data.strip.start_with?('data')
+              Carrierwave::Base64::Base64StringIO.new(data.strip, filename+'_'+i)
+            else
+              data
+            end
+          end if data.is_a?(Array)
+
+          super files
+        end
+      end
     end
   end
 end
