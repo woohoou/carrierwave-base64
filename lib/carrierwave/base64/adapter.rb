@@ -58,23 +58,21 @@ module Carrierwave
           if respond_to?("#{attribute}_will_change!") && data_array.present?
             send "#{attribute}_will_change!"
           end
-
           filename = if options[:file_name].respond_to?(:call)
             options[:file_name].call(self)
           else
             options[:file_name]
           end.to_s
-
-          files = []
+          files_array = []
           data_array.each_with_index do |data, i|
-            files << if data.is_a?(String) && data.strip.start_with?('data')
-              Carrierwave::Base64::Base64StringIO.new(data.strip, filename+'_'+i)
+            files_array << if data.is_a?(String) && data.strip.start_with?('data')
+              Carrierwave::Base64::Base64StringIO.new(data.strip, filename+'_'+i.to_s)
             else
               data
             end
-          end if data.is_a?(Array)
+          end if data_array.is_a?(Array)
 
-          super files
+          super files_array
         end
       end
     end
