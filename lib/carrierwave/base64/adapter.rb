@@ -69,7 +69,7 @@ module Carrierwave
           files_array = []
           data_array.each_with_index do |data, i|
             if data.is_a?(String) && data.strip.start_with?('data')
-              files_array << Carrierwave::Base64::Base64StringIO.new(data.strip, filename+'_'+i.to_s)
+              files_array << Carrierwave::Base64::Base64StringIO.new(data.strip, filename+'_'+SecureRandom.hex)
             elsif send(attribute).map(&:url).include?(data)
               file = send(attribute).find{|t| t.url == data}
               files_array << file if file.present?
