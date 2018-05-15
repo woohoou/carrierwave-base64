@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module Carrierwave
   module Base64
     module Adapter
@@ -63,14 +65,20 @@ module Carrierwave
           else
             options[:file_name]
           end.to_s
+
           files_array = []
           data_array.each_with_index do |data, i|
-            files_array << if data.is_a?(String) && data.strip.start_with?('data')
-              Carrierwave::Base64::Base64StringIO.new(data.strip, filename+'_'+i.to_s)
+            if data.is_a?(String) && data.strip.start_with?('data')
+              files_array << Carrierwave::Base64::Base64StringIO.new(data.strip, filename+'_'+SecureRandom.hex)
+            elsif send(attribute).map(&:url).include?(data)
+              file = send(attribute).find{|t| t.url == data}
+              files_array << file if file.present?
             else
-              data
+              files_array << data
             end
           end if data_array.is_a?(Array)
+
+          send("remove_#{attribute}!".to_sym) if files == []
 
           super files_array
         end
