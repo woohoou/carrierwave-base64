@@ -78,7 +78,7 @@ module Carrierwave
             end
           end if data_array.is_a?(Array)
 
-          send("remove_#{attribute}!".to_sym) if files == []
+          send("remove_#{attribute}!".to_sym) if files_array == []
 
           super files_array
         end
