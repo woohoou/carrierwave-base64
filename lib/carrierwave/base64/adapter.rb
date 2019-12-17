@@ -34,7 +34,7 @@ module Carrierwave
                        options[:file_name]
                      end.to_s
 
-          super Carrierwave::Base64::Base64StringIO.new(data.strip, filename)
+          super Carrierwave::Base64::Base64StringIO.new(data.strip, filename+'_'+SecureRandom.hex)
         end
         # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
         # rubocop:enable Metrics/CyclomaticComplexity
